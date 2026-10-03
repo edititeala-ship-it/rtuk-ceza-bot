@@ -12,6 +12,7 @@
 // alıntısı), yayın tarihi/saati, program adı (tırnak içi), ceza oranı ve tutarı.
 
 import * as cheerio from "cheerio";
+import { kanalAdi } from "./kanal.js";
 
 export const BASE = "https://www.rtuk.gov.tr";
 export const LIST_URL = `${BASE}/ust-kurul-kararlari`;
@@ -279,7 +280,8 @@ export function parseDetay(html, item = {}) {
     kararNo,
     konu,
     turler,
-    kanal,
+    kanal: kanalAdi(kanal),
+    kanalKaynak: kanal, // RTÜK başlığındaki ham logo adı
     kurulus,
     madde: madde ? madde.kisa : null,
     ...parseYayin(lines[0] || ""),
