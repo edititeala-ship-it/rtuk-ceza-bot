@@ -13,17 +13,11 @@
 import * as cheerio from "cheerio";
 import { BASE, normDate } from "./rtuk.js";
 import { YASAK_ONEK } from "./yasak.js";
+import { getHtml } from "./http.js";
 
 export const DUYURU_LIST_URL = `${BASE}/basin-aciklamalari-4944`;
-const UA = "rtuk-yaptirim-bot/0.1 (+https://github.com/edititeala-ship-it/rtuk-ceza-bot) resmi RTUK verisini aktarir";
 const squash = (s) => String(s || "").replace(/\s+/g, " ").trim();
 const LIMIT = Number(process.env.POST_LIMIT || 280);
-
-async function getHtml(url) {
-  const res = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "tr" } });
-  if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
-  return await res.text();
-}
 
 // [{ id, url, baslik, tarih }] yeniden eskiye
 export function parseDuyuruList(html) {

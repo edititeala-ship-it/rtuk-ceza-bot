@@ -10,16 +10,10 @@
 
 import * as cheerio from "cheerio";
 import { BASE, normDate } from "./rtuk.js";
+import { getHtml } from "./http.js";
 
 export const YASAK_LIST_URL = `${BASE}/mahkeme-yayin-yasaklari`;
-const UA = "rtuk-yaptirim-bot/0.1 (+https://github.com/edititeala-ship-it/rtuk-ceza-bot) resmi RTUK verisini aktarir";
 const squash = (s) => String(s || "").replace(/\s+/g, " ").trim();
-
-async function getHtml(url) {
-  const res = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "tr" } });
-  if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
-  return await res.text();
-}
 
 // [{ id, url, baslik, duyuruTarihi }] — sayfadaki sırayla (yeniden eskiye)
 export function parseYasakList(html) {

@@ -13,16 +13,10 @@
 
 import * as cheerio from "cheerio";
 import { kanalAdi } from "./kanal.js";
+import { getHtml } from "./http.js";
 
 export const BASE = "https://www.rtuk.gov.tr";
 export const LIST_URL = `${BASE}/ust-kurul-kararlari`;
-const UA = "rtuk-yaptirim-bot/0.1 (+https://github.com/) resmi RTUK verisini aktarir";
-
-async function getHtml(url) {
-  const res = await fetch(url, { headers: { "User-Agent": UA, "Accept-Language": "tr" } });
-  if (!res.ok) throw new Error(`HTTP ${res.status} ${url}`);
-  return await res.text();
-}
 
 // "25.6.2026" -> "25.06.2026"
 export function normDate(s) {
