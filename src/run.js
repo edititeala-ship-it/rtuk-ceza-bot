@@ -1,7 +1,7 @@
 // Akış (her koşu):
 //  1. state.json oku
 //  2. Yaptırım kararları: listenin ilk PAGES sayfası, yeni olanları eskiden yeniye at
-//  3. Mahkeme yayın yasakları: listenin ilk YASAK_PAGES sayfası, yeni olanları eskiden yeniye at
+//  3. RTÜK'ün "Kamuoyuna Duyuru" ile ilan ettiği yayın yasakları: RTÜK'ün cümlesiyle at
 //  4. Ay başında: geçen ayın yayın yasağı sayısını tek gönderiyle duyur
 //  5. state.json güncelle (Actions bunu commit eder)
 //
@@ -12,12 +12,13 @@
 import fs from "node:fs";
 import { fetchKararList, fetchKararDetay, isYaptirim, toplantiSira } from "./rtuk.js";
 import { formatKarar } from "./format.js";
-import { fetchYasakList, fetchYasakDetay, formatYasak, formatAylikOzet, ayYasakSayisi, ayAdi } from "./yasak.js";
+import { formatAylikOzet, ayYasakSayisi, ayAdi } from "./yasak.js";
+import { fetchDuyuruList, fetchDuyuruDetay, formatDuyuru } from "./duyuru.js";
 import { post } from "./x.js";
 
 const STATE_FILE = process.env.STATE_FILE || "state.json";
 const PAGES = Number(process.env.PAGES || 4);
-const YASAK_PAGES = Number(process.env.YASAK_PAGES || 2);
+const DUYURU_PAGES = Number(process.env.DUYURU_PAGES || 1);
 const MAX_POSTS_PER_RUN = Number(process.env.MAX_POSTS_PER_RUN || 3);
 const GAP_MS = Number(process.env.POST_GAP_SECONDS || 180) * 1000;
 const BACKFILL = process.env.BACKFILL === "1";
@@ -28,9 +29,13 @@ function loadState() {
   s.posted ??= {};   // yaptırım: id -> { tweetId, at, toplantiNo, kararNo, kanal }
   s.baseline ??= {}; // yaptırım: ilk kurulumda atlananlar
   s.yasak ??= {};
-  s.yasak.posted ??= {};   // yasak id -> { tweetId, at, mahkeme, kararTarihi }
-  s.yasak.baseline ??= {}; // ilk kurulumda atlananlar
+  s.yasak.posted ??= {};   // (elle atılan) yasak id -> { tweetId, ... }
+  s.yasak.baseline ??= {};
   s.yasak.aylik ??= {};    // "2026-09" -> { n, tweetId, at }
+  s.duyuru ??= {};
+  s.duyuru.posted ??= {};   // duyuru id -> { tweetId, at, mahkeme, kararTarihi, kararSayisi }
+  s.duyuru.baseline ??= {}; // ilk kurulumda atlananlar
+  s.duyuru.gecilen ??= {};  // yasak içermeyen açıklamalar
   return s;
 }
 const saveState = (s) => fs.writeFileSync(STATE_FILE, JSON.stringify(s, null, 2) + "\n");
@@ -80,34 +85,41 @@ async function yaptirimlar(state) {
   }
 }
 
-// ---------- 2. Mahkeme yayın yasakları ----------
-async function yasaklar(state) {
-  const list = await fetchYasakList(YASAK_PAGES);
-  console.log(`[yasak] ${YASAK_PAGES} sayfada ${list.length} karar. En yeni: ${list[0]?.baslik} (${list[0]?.duyuruTarihi}).`);
+// ---------- 2. RTÜK'ün duyurduğu yayın yasakları (Basın Açıklamaları) ----------
+// Mahkeme yasakları listesindeki her karar atılmaz (konu yok, kuru kalır); yalnızca RTÜK'ün
+// "Kamuoyuna Duyuru" ile ilan edip konusunu kendisinin yazdığı yasaklar atılır.
+async function duyurular(state) {
+  const list = await fetchDuyuruList(DUYURU_PAGES);
+  console.log(`[duyuru] ${DUYURU_PAGES} sayfada ${list.length} açıklama. En yeni: ${list[0]?.baslik} (${list[0]?.tarih}).`);
 
-  const s = state.yasak;
+  const s = state.duyuru;
   const bos = !Object.keys(s.posted).length && !Object.keys(s.baseline).length;
   if (bos && !BACKFILL) {
-    for (const k of list) s.baseline[k.id] = { at: new Date().toISOString(), duyuruTarihi: k.duyuruTarihi };
+    for (const k of list) s.baseline[k.id] = { at: new Date().toISOString(), tarih: k.tarih, baslik: k.baslik };
     saveState(state);
-    console.log(`[yasak] İlk çalıştırma: ${list.length} karar başlangıç noktası olarak işaretlendi, gönderi atılmadı.`);
+    console.log(`[duyuru] İlk çalıştırma: ${list.length} açıklama başlangıç noktası olarak işaretlendi, gönderi atılmadı.`);
     return;
   }
 
-  const pending = list.filter((k) => !s.posted[k.id] && !s.baseline[k.id]).sort((a, b) => Number(a.id) - Number(b.id));
-  console.log(`[yasak] Yeni: ${pending.map((k) => k.id).join(", ") || "yok"}`);
+  const pending = list.filter((k) => !s.posted[k.id] && !s.baseline[k.id] && !s.gecilen[k.id]).sort((a, b) => Number(a.id) - Number(b.id));
+  console.log(`[duyuru] Yeni: ${pending.map((k) => k.id).join(", ") || "yok"}`);
 
   for (const k of pending) {
-    if (kaldi() <= 0) { console.log(`[yasak] Koşu sınırı (${MAX_POSTS_PER_RUN}) doldu; kalanlar sonraki koşuda.`); return; }
-    const d = await fetchYasakDetay(k);
-    if (!d.mahkeme) {
-      console.warn(`UYARI yasak ${k.id}: mahkeme çözülemedi, bu koşuda atlandı. Başlık: ${k.baslik}`);
+    if (kaldi() <= 0) { console.log(`[duyuru] Koşu sınırı (${MAX_POSTS_PER_RUN}) doldu; kalanlar sonraki koşuda.`); return; }
+    const d = await fetchDuyuruDetay(k);
+    if (!d.yasak) {
+      // Yasak duyurusu değil (uyarı, görüş vb.): bir daha bakılmaz
+      s.gecilen[k.id] = { at: new Date().toISOString(), tarih: d.tarih, baslik: d.baslik };
+      saveState(state);
+      console.log(`[duyuru] ${k.id} yasak duyurusu değil, geçildi: ${d.baslik}`);
       continue;
     }
-    await gonder(formatYasak(d), (tweetId) => {
-      s.posted[k.id] = { tweetId, at: new Date().toISOString(), mahkeme: d.mahkeme, kararTarihi: d.kararTarihi, duyuruTarihi: d.duyuruTarihi };
+    const { text, kisaldi } = formatDuyuru(d);
+    if (kisaldi) console.warn(`Not duyuru ${k.id}: sınır için alıntı kısaltıldı.`);
+    await gonder(text, (tweetId) => {
+      s.posted[k.id] = { tweetId, at: new Date().toISOString(), tarih: d.tarih, mahkeme: d.mahkeme, kararTarihi: d.kararTarihi, kararSayisi: d.kararSayisi };
       saveState(state);
-      console.log(`[yasak] Atıldı: ${k.id} ${d.mahkeme} ${d.kararTarihi} → ${tweetId}`);
+      console.log(`[duyuru] Atıldı: ${k.id} ${d.mahkeme} ${d.kararTarihi} → ${tweetId}`);
     });
   }
 }
@@ -133,7 +145,7 @@ async function aylikOzet(state) {
 async function main() {
   const state = loadState();
   await yaptirimlar(state);
-  await yasaklar(state);
+  await duyurular(state);
   await aylikOzet(state);
   console.log(`Bitti. Bu koşuda ${budget.used} gönderi.`);
 }

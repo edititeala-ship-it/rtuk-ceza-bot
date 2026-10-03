@@ -51,24 +51,33 @@ Tutarsız yaptırımlarda (uyarı, durdurma) ikinci satır yalnızca kanal adıd
 "RTÜK uyarı kararı", "RTÜK yayın durdurma kararı" vb. olur. Başlıkta "ihlali" geçmeyen
 kararlarda (örn. durdurma kararının uygulanmaması) madde "Dayanak:" diye verilir.
 
-## İkinci akış: mahkeme yayın yasakları
+## İkinci akış: RTÜK'ün duyurduğu yayın yasakları
 
-Kaynak: `https://www.rtuk.gov.tr/mahkeme-yayin-yasaklari` (tarihe göre yeniden eskiye), detay
-`/Yasak/YasakDetay/<id>`. Yalnızca üç sabit alan: mahkeme, karar tarihi, karar sayısı. Yasağın
-konusu alınmaz (sitede de herkese açık değil). Kararın varlığını duyurmak ihlal değildir, RTÜK
-bunu "tüm kuruluşlara duyurur"; ihlal olan şey yasağın konusunu anlatmaktır.
+Kaynak: `https://www.rtuk.gov.tr/basin-aciklamalari-4944`, detay `/kamuoyuna-duyuru/<id>`
+(`src/duyuru.js`). RTÜK büyük olaylarda yasağı "Kamuoyuna Duyuru" ile ilan eder ve konuyu
+kendisi yazar. Bot yalnızca "... yayın yasağı getirilmiştir/kararı verilmiştir." cümlesini
+içeren açıklamaları alır; cümleyi aynen alıntılar, mahkeme/tarih/sayıyı cümleden sabit kalıpla
+çözer. Yasak içermeyen açıklamalar (uyarı, görüş) `duyuru.gecilen`e yazılır, bir daha bakılmaz.
 
 ```
 ⛔ Yayın yasağı
 
-Turgutlu Sulh Ceza Hâkimliği
-22.09.2026 · 2026/4943 D. İş
+RTÜK: "Manisa ili Turgutlu ilçesinde 22 Eylül 2026 tarihinde meydana gelen silahlı saldırıya
+ilişkin olarak yürütülen adli soruşturma kapsamında, Turgutlu Sulh Ceza Hâkimliğinin 22.09.2026
+tarihli ve 2026/4943 D. İş sayılı kararıyla yayın yasağı getirilmiştir."
 
+Turgutlu Sulh Ceza Hâkimliği · 22.09.2026 · 2026/4943 D. İş
+RTÜK duyurusu: 22.09.2026
 Kaynak: RTÜK
 ```
 
-Ay başında geçen ayın sayısı tek gönderiyle: `⛔ Eylül 2026: RTÜK 14 yayın yasağı kararı duyurdu.`
-Sayı listeden sayılır (o aydan eski ilk kayıt görülene kadar sayfalar okunur).
+Bu gönderiler 280'i aşar; hesap Premium olduğu için workflow'da `POST_LIMIT=4000`. Premium
+biterse 280'e çekilir, alıntı "…" ile kısalır.
+
+Mahkeme yayın yasakları listesindeki (`/mahkeme-yayin-yasaklari`) tekil kararlar otomatik
+atılmaz (konu olmadığı için kuru kalıyor); `src/yasak.js` yalnızca aylık sayı ve elle atım için
+kalır. Ay başında geçen ayın sayısı tek gönderiyle: `⛔ Eylül 2026: RTÜK 14 yayın yasağı kararı
+duyurdu.` Sayı listeden sayılır (o aydan eski ilk kayıt görülene kadar sayfalar okunur).
 
 Gönderi bütçesi (`MAX_POSTS_PER_RUN`) yaptırım, yasak ve aylık özet için ortaktır.
 

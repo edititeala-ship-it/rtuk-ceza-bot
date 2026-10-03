@@ -7,6 +7,7 @@ import fs from "node:fs";
 import { fetchKararDetay, BASE } from "./rtuk.js";
 import { formatKarar } from "./format.js";
 import { fetchYasakDetay, formatYasak, formatAylikOzet, ayYasakSayisi } from "./yasak.js";
+import { fetchDuyuruDetay, formatDuyuru } from "./duyuru.js";
 import { post } from "./x.js";
 
 const STATE_FILE = process.env.STATE_FILE || "state.json";
@@ -42,6 +43,20 @@ if (/^\d+$/.test(arg)) {
   delete state.yasak.baseline[id];
   save();
   console.log(`Atıldı: yasak ${id} ${d.mahkeme} → ${tweetId}`);
+} else if (/^duyuru:\d+$/.test(arg)) {
+  const id = arg.slice(7);
+  state.duyuru ??= {}; state.duyuru.posted ??= {}; state.duyuru.baseline ??= {}; state.duyuru.gecilen ??= {};
+  if (state.duyuru.posted[id]) { console.log(`duyuru ${id} zaten atılmış (${state.duyuru.posted[id].tweetId}).`); process.exit(0); }
+  const d = await fetchDuyuruDetay({ id, url: `${BASE}/kamuoyuna-duyuru/${id}` });
+  if (!d.yasak) throw new Error(`duyuru ${id} yayın yasağı duyurusu değil: ${d.baslik}`);
+  const { text, kisaldi } = formatDuyuru(d);
+  if (kisaldi) console.warn("Not: sınır için alıntı kısaltıldı.");
+  say(text);
+  const tweetId = await post(text);
+  state.duyuru.posted[id] = { tweetId, at: new Date().toISOString(), tarih: d.tarih, mahkeme: d.mahkeme, kararTarihi: d.kararTarihi, kararSayisi: d.kararSayisi, note: "elle (one.js)" };
+  delete state.duyuru.baseline[id];
+  save();
+  console.log(`Atıldı: duyuru ${id} ${d.mahkeme} → ${tweetId}`);
 } else if (/^aylik:\d{4}-\d{2}$/.test(arg)) {
   const ym = arg.slice(6);
   if (state.yasak.aylik[ym]?.tweetId) { console.log(`${ym} özeti zaten atılmış (${state.yasak.aylik[ym].tweetId}).`); process.exit(0); }

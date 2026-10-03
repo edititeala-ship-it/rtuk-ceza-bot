@@ -43,6 +43,7 @@ jobs:
           PAGES: "4"
           MAX_POSTS_PER_RUN: "3"
           POST_GAP_SECONDS: "180"
+          POST_LIMIT: "4000"   # hesap Premium; Premium biterse 280 yap
           KARAR_ID: ${{ github.event.inputs.karar_id }}
         run: |
           if [ -n "$KARAR_ID" ]; then node src/one.js "$KARAR_ID"; else node src/run.js; fi
