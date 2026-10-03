@@ -51,6 +51,27 @@ Tutarsız yaptırımlarda (uyarı, durdurma) ikinci satır yalnızca kanal adıd
 "RTÜK uyarı kararı", "RTÜK yayın durdurma kararı" vb. olur. Başlıkta "ihlali" geçmeyen
 kararlarda (örn. durdurma kararının uygulanmaması) madde "Dayanak:" diye verilir.
 
+## İkinci akış: mahkeme yayın yasakları
+
+Kaynak: `https://www.rtuk.gov.tr/mahkeme-yayin-yasaklari` (tarihe göre yeniden eskiye), detay
+`/Yasak/YasakDetay/<id>`. Yalnızca üç sabit alan: mahkeme, karar tarihi, karar sayısı. Yasağın
+konusu alınmaz (sitede de herkese açık değil). Kararın varlığını duyurmak ihlal değildir, RTÜK
+bunu "tüm kuruluşlara duyurur"; ihlal olan şey yasağın konusunu anlatmaktır.
+
+```
+⛔ Yayın yasağı
+
+Turgutlu Sulh Ceza Hâkimliği
+22.09.2026 · 2026/4943 D. İş
+
+Kaynak: RTÜK
+```
+
+Ay başında geçen ayın sayısı tek gönderiyle: `⛔ Eylül 2026: RTÜK 14 yayın yasağı kararı duyurdu.`
+Sayı listeden sayılır (o aydan eski ilk kayıt görülene kadar sayfalar okunur).
+
+Gönderi bütçesi (`MAX_POSTS_PER_RUN`) yaptırım, yasak ve aylık özet için ortaktır.
+
 ## Durum (state.json)
 
 - `posted`: karar id → tweet id. Mükerrer kontrolü bununla.

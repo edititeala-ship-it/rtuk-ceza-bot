@@ -18,7 +18,7 @@ export const LIMIT = Number(process.env.POST_LIMIT || 280);
 const len = (s) => [...s].length; // X, Türkçe harfleri ve — · “ ” karakterlerini 1 sayar
 
 // Her gönderinin başındaki sabit işaret. Emoji link sayılmaz, ek ücret yok; X'te 2'şer karakter.
-export const ONEK = process.env.POST_PREFIX ?? "🚨🚨 ";
+export const ONEK = process.env.POST_PREFIX ?? "🚨 ";
 
 function baslik(turler) {
   const b = !turler.length ? "RTÜK yaptırım kararı"
