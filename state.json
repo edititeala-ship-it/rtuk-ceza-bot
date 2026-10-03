@@ -458,7 +458,17 @@
     }
   },
   "duyuru": {
-    "posted": {},
+    "posted": {
+      "5235": {
+        "tweetId": "2106377448082292862",
+        "at": "2026-10-03T13:34:53.049Z",
+        "tarih": "22.09.2026",
+        "mahkeme": "Turgutlu Sulh Ceza Hâkimliği",
+        "kararTarihi": "22.09.2026",
+        "kararSayisi": "2026/4943 D. İş",
+        "note": "elle (one.js)"
+      }
+    },
     "baseline": {
       "4079": {
         "at": "2026-10-03T13:33:00.305Z",
@@ -604,11 +614,6 @@
         "at": "2026-10-03T13:33:00.305Z",
         "tarih": "22.09.2026",
         "baslik": "Kamuoyuna Duyuru!"
-      },
-      "5235": {
-        "at": "2026-10-03T13:33:00.305Z",
-        "tarih": "22.09.2026",
-        "baslik": "KAMUOYUNA DUYURU"
       }
     },
     "gecilen": {}
