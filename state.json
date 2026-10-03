@@ -1,14 +1,5 @@
 {
-  "posted": {
-    "20767": {
-      "tweetId": "2106363048902418869",
-      "at": "2026-10-03T12:37:40.004Z",
-      "toplantiNo": "2026/24",
-      "kararNo": 14,
-      "kanal": "h halk",
-      "note": "elle (one.js)"
-    }
-  },
+  "posted": {},
   "baseline": {
     "20653": {
       "at": "2026-10-03T12:33:58.437Z",
@@ -189,6 +180,16 @@
       "at": "2026-10-03T12:33:58.437Z",
       "toplantiNo": "2026/24",
       "kararNo": 15
+    }
+  },
+  "replaced": {
+    "20767-v1": {
+      "tweetId": "2106363048902418869",
+      "at": "2026-10-03T12:37:40.004Z",
+      "toplantiNo": "2026/24",
+      "kararNo": 14,
+      "kanal": "h halk",
+      "note": "ilk test gönderisi (h halk yazımıyla); düzeltilmiş hali yeniden atıldı"
     }
   }
 }
