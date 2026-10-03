@@ -7,6 +7,11 @@ on:
     # ile birikme aynı hafta içinde erir.
     - cron: "23 9 * * *"
   workflow_dispatch:         # elle tetikleme
+    inputs:
+      karar_id:
+        description: "Yalnızca bu karar id'sini at (boş: normal koşu)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -38,7 +43,9 @@ jobs:
           PAGES: "4"
           MAX_POSTS_PER_RUN: "3"
           POST_GAP_SECONDS: "180"
-        run: node src/run.js
+          KARAR_ID: ${{ github.event.inputs.karar_id }}
+        run: |
+          if [ -n "$KARAR_ID" ]; then node src/one.js "$KARAR_ID"; else node src/run.js; fi
 
       - name: state.json commit
         if: always()
