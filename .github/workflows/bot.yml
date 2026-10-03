@@ -1,0 +1,50 @@
+name: rtuk-yaptirim-bot
+
+on:
+  schedule:
+    # Günde bir, 12:23 Türkiye saati. Üst Kurul haftada bir toplanır; yaptırım kararları
+    # toplantıdan haftalar sonra, küçük gruplar halinde yayımlanır. Günlük koşu + MAX 3
+    # ile birikme aynı hafta içinde erir.
+    - cron: "23 9 * * *"
+  workflow_dispatch:         # elle tetikleme
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Çalıştır
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          PAGES: "4"
+          MAX_POSTS_PER_RUN: "3"
+          POST_GAP_SECONDS: "180"
+        run: node src/run.js
+
+      - name: state.json commit
+        if: always()
+        run: |
+          git config user.name "rtuk-yaptirim-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "state: $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
