@@ -40,10 +40,10 @@ const budget = { used: 0 };
 const kaldi = () => MAX_POSTS_PER_RUN - budget.used;
 
 async function gonder(text, kaydet) {
+  if (budget.used > 0) await sleep(GAP_MS); // gönderiler arası aralık; son gönderiden sonra boşuna beklenmez
   const tweetId = await post(text);
   kaydet(tweetId);
   budget.used++;
-  if (kaldi() > 0) await sleep(GAP_MS);
 }
 
 // ---------- 1. Yaptırım kararları ----------
