@@ -480,6 +480,14 @@
         "mahkeme": "İstanbul 3. Sulh Ceza Hâkimliği",
         "kararTarihi": "06.10.2026",
         "kararSayisi": "2026/9304 D. İş"
+      },
+      "5251": {
+        "tweetId": "2119881871643337122",
+        "at": "2026-11-09T19:56:38.533Z",
+        "tarih": "09.11.2026",
+        "mahkeme": "Aliağa Sulh Ceza Hâkimliği",
+        "kararTarihi": null,
+        "kararSayisi": "2026/2238 D. İş"
       }
     },
     "baseline": {
