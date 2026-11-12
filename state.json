@@ -7,6 +7,30 @@
       "kararNo": 14,
       "kanal": "Halk TV",
       "note": "elle (one.js)"
+    },
+    "20799": {
+      "tweetId": "2120934644900110686",
+      "at": "2026-11-12T17:39:59.240Z",
+      "toplantiNo": "2026/38",
+      "kararNo": 12,
+      "kanal": "Sözcü TV",
+      "kanalKaynak": "SZC"
+    },
+    "20802": {
+      "tweetId": "2120935403372888087",
+      "at": "2026-11-12T17:43:00.066Z",
+      "toplantiNo": "2026/39",
+      "kararNo": 17,
+      "kanal": "Sözcü TV",
+      "kanalKaynak": "SZC"
+    },
+    "20803": {
+      "tweetId": "2120936175112163381",
+      "at": "2026-11-12T17:46:04.058Z",
+      "toplantiNo": "2026/39",
+      "kararNo": 18,
+      "kanal": "Koza",
+      "kanalKaynak": "KOZA"
     }
   },
   "baseline": {
