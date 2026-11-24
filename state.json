@@ -31,6 +31,22 @@
       "kararNo": 18,
       "kanal": "Koza",
       "kanalKaynak": "KOZA"
+    },
+    "20816": {
+      "tweetId": "2125322412786860334",
+      "at": "2026-11-24T20:15:24.605Z",
+      "toplantiNo": "2026/41",
+      "kararNo": 9,
+      "kanal": "Sözcü TV",
+      "kanalKaynak": "SZC"
+    },
+    "20817": {
+      "tweetId": "2125323173625250270",
+      "at": "2026-11-24T20:18:25.997Z",
+      "toplantiNo": "2026/41",
+      "kararNo": 10,
+      "kanal": "Koza",
+      "kanalKaynak": "KOZA"
     }
   },
   "baseline": {
